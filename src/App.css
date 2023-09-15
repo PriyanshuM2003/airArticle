@@ -1,0 +1,18 @@
+.navbar-brand {
+  color: red !important;
+}
+
+.nav-link {
+  color: #e91e63 !important;
+}
+
+.nav-link.active {
+  color: #ffe838 !important;
+}
+
+/* #e91e63, #673ab7
+#ffe838, #fd57bf */
+
+.nav-link:hover {
+  color: #fd57bf !important;
+}
