@@ -11,11 +11,10 @@ const corsOptions = {
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 };
 
-
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.options("*", cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use("/api/auth", require("./routes/auth"));
