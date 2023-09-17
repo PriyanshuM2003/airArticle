@@ -25,6 +25,8 @@ export const MyArticles = (props) => {
     edescription: "",
     etags: [],
     ecategory: [],
+    ecreatedAt: "",
+    elikesCount: "",
   });
 
   const [inputTag, setInputTag] = useState("");
@@ -37,6 +39,8 @@ export const MyArticles = (props) => {
       edescription: currentArticle.description,
       etags: currentArticle.tags,
       ecategory: currentArticle.category,
+      ecreatedAt: currentArticle.createdAt,
+      elikesCount: currentArticle.likesCount,
     });
   };
 
@@ -46,7 +50,9 @@ export const MyArticles = (props) => {
       article.etitle,
       article.edescription,
       article.etags,
-      article.ecategory
+      article.ecategory,
+      article.ecreatedAt,
+      article.elikesCount
     );
     refClose.current.click();
     setInputTag("");
@@ -124,25 +130,35 @@ export const MyArticles = (props) => {
           return (
             <div
               key={article._id}
+              onClick={() => {
+                updateArticle(article);
+              }}
               className="col-my-3"
               style={{ width: "437px" }}
             >
               <div className="card my-3 border border-info-subtle">
-                <div
-                  className="card-body"
-                  role="button"
-                  onClick={() => {
-                    updateArticle(article);
-                  }}
-                >
+                <div className="card-body" role="button">
                   <h5 className="card-title">{article.title}</h5>
                   <p className="card-text">{truncatedDescriptions[index]}</p>
-                  <span className="d-flex justify-content-end align-items-center card-text text-primary">
-                    {article.category.join(", ")}
-                  </span>
-                  <span className="d-flex justify-content-end align-items-center card-text">
-                    {formatDate(article.createdAt)}
-                  </span>
+                  <div className="d-flex justify-content-end align-items-center">
+                    <p className="card-text text-primary">
+                      {article.category.join(", ")}
+                    </p>
+                  </div>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <i className="fa-solid fa-heart fs-5 text-danger">
+                      &nbsp;:&nbsp;
+                      <span
+                        className="fw-normal text-dark"
+                        style={{ fontSize: "12px" }}
+                      >
+                        {article.likesCount}
+                      </span>
+                    </i>
+                    <span className=" card-text">
+                      {formatDate(article.createdAt)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -163,11 +179,6 @@ export const MyArticles = (props) => {
               <h1 className="modal-title fs-5" id="exampleModalToggleLabel">
                 {article.etitle}
               </h1>
-              &nbsp;(
-              <span className="card-text text-primary">
-                {article.ecategory.join(", ")}
-              </span>
-              )
               <button
                 type="button"
                 className="btn-close btn btn-danger"
@@ -176,14 +187,33 @@ export const MyArticles = (props) => {
               ></button>
             </div>
             <div className="modal-body">{article.edescription}</div>
-            <div className="modal-footer">
-              <button
-                className="btn btn-primary fw-semibold"
-                data-bs-target="#exampleModalToggle2"
-                data-bs-toggle="modal"
-              >
-                Edit Article
-              </button>
+            <div className="border-top d-flex flex-column">
+              <div className="d-flex justify-content-between align-items-center mt-1">
+                <p className="card-text text-primary ms-2">
+                  {article.ecategory.join(", ")}
+                </p>
+                <button
+                  className="btn btn-primary fw-semibold me-2"
+                  data-bs-target="#exampleModalToggle2"
+                  data-bs-toggle="modal"
+                >
+                  Edit Article
+                </button>
+              </div>
+              <div className="d-flex justify-content-between align-items-center mb-1">
+                <i className="fa-solid fa-heart fs-5 text-danger ms-2">
+                  &nbsp;:&nbsp;
+                  <span
+                    className="fw-normal text-dark"
+                    style={{ fontSize: "12px" }}
+                  >
+                    {article.elikesCount}
+                  </span>
+                </i>
+                <span className="card-text me-2">
+                  {formatDate(article.ecreatedAt)}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -210,7 +240,7 @@ export const MyArticles = (props) => {
               ></button>
             </div>
             <div className="modal-body">
-              <form className="my-3">
+              <form>
                 <div className="mb-3">
                   <label htmlFor="title" className="form-label fw-semibold">
                     Title

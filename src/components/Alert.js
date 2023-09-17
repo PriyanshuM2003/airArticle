@@ -14,7 +14,7 @@ function Alert({ alert }) {
     <div className="alert-container">
       {alert && (
         <div
-          className={`alert alert-${alert.type} alert-dismissible fade show`}
+          className={`alert alert-${alert.type} alert-dismissible fade show d-flex justify-content-center`}
           role="alert"
         >
           <strong>{capitalize(alert.type)}</strong>: {alert.msg}

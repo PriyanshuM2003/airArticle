@@ -8,7 +8,7 @@ const ArticleState = (props) => {
   const [articles, setArticles] = useState(articlesInitial);
 
   //* Getting logged user articles
-  const getAllArticles = async (category, tags) => {
+  const getAllArticles = async (category) => {
     try {
       const url = category
         ? `${host}/api/articles/fetchallarticles?category=${category}`
@@ -26,9 +26,53 @@ const ArticleState = (props) => {
       }
 
       const json = await response.json();
+
       setArticles(json);
     } catch (error) {
       console.error("Error fetching articles:", error.message);
+    }
+  };
+
+  //* Function to like an article
+  const toggleLike = async (articleId) => {
+    try {
+      const response = await fetch(
+        `${host}/api/articles/togglelike/${articleId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": localStorage.getItem("token"),
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Error toggling like: HTTP error!");
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      const newArticles = articles.map((article) =>
+        article._id === articleId
+          ? {
+              ...article,
+              liked: responseData.liked,
+              likesCount: responseData.likesCount,
+            }
+          : article
+      );
+
+      setArticles(newArticles);
+
+      if (responseData.liked) {
+        console.log("Like toggled");
+      } else {
+        console.log("Dislike toggled");
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error.message);
     }
   };
 
@@ -137,6 +181,7 @@ const ArticleState = (props) => {
         getAllArticles,
         getLoggedArticles,
         searchArticlesByTags,
+        toggleLike,
       }}
     >
       {props.children}

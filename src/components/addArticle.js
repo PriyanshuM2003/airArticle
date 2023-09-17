@@ -158,6 +158,7 @@ const AddArticle = ({ showAlert }) => {
                 type="text"
                 className="form-control w-25 me-2"
                 id="tags"
+                placeholder="Press Enter to add Tag"
                 name="tags"
                 value={inputTag}
                 onChange={handleTagInputChange}
@@ -175,6 +176,12 @@ const AddArticle = ({ showAlert }) => {
                   </button>
                 ))}
               </div>
+              {article.tags.length === 0 && (
+                <p className="text-danger fw-bold">
+                  /*Enter relevant Tags. These tags will be used for searching
+                  your article.*/
+                </p>
+              )}
             </div>
           </div>
           <div className="d-flex flex-column">

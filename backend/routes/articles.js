@@ -18,6 +18,39 @@ router.get("/fetchallarticles", async (req, res) => {
   }
 });
 
+// * Article like/unlike
+router.post("/togglelike/:id", fetchuser, async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id).populate("likedBy");
+
+    if (!article) {
+      return res.status(404).json({ error: "Article not found" });
+    }
+
+    const userId = req.user.id;
+
+    if (article.likedBy.some((user) => user._id.equals(userId))) {
+      article.likedBy = article.likedBy.filter(
+        (user) => !user._id.equals(userId)
+      );
+    } else {
+      article.likedBy.push(userId);
+    }
+
+    article.likesCount = article.likedBy.length;
+
+    await article.save();
+
+    res.json({
+      liked: article.likedBy.some((user) => user._id.equals(userId)),
+      likesCount: article.likesCount,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // * Get searched query tags result
 router.get("/search", async (req, res) => {
   const { tags } = req.query;

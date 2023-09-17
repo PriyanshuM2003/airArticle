@@ -2,9 +2,12 @@ import React, { useContext, useEffect, useState } from "react";
 import ArticleContext from "../context/ArticleContext";
 import { useLocation } from "react-router-dom";
 
-const Category = () => {
+const Category = (props) => {
   const context = useContext(ArticleContext);
-  const { getAllArticles, articles } = context;
+  const { getAllArticles, articles, toggleLike } = context;
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [likedArticles, setLikedArticles] = useState([]);
+  const userToken = localStorage.getItem("token");
   const location = useLocation();
 
   const selectedCategory =
@@ -32,11 +35,53 @@ const Category = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const [selectedArticle, setSelectedArticle] = useState(null);
-
   const openModal = (article) => {
     setSelectedArticle(article);
   };
+
+  const isArticleLikedByUser = (article) => {
+    const isLiked = likedArticles.includes(article._id);
+
+    if (userToken) {
+      const previouslyLikedArticles =
+        JSON.parse(localStorage.getItem(`${userToken}_likedArticles`)) || [];
+
+      if (previouslyLikedArticles.includes(article._id)) {
+        return true;
+      }
+    }
+
+    return isLiked;
+  };
+
+  const handleLikeToggle = async (article) => {
+    try {
+      if (!userToken) {
+        props.showAlert("Please Login/Signup to Like the Article", "warning");
+        return;
+      }
+
+      const liked = likedArticles.includes(article._id);
+      const updatedArticle = await toggleLike(article._id, liked, userToken);
+
+      let updatedLikedArticles;
+
+      if (liked) {
+        updatedLikedArticles = likedArticles.filter((id) => id !== article._id);
+      } else {
+        updatedLikedArticles = [...likedArticles, article._id];
+      }
+
+      setLikedArticles(updatedLikedArticles);
+      localStorage.setItem(
+        `${userToken}_likedArticles`,
+        JSON.stringify(updatedLikedArticles)
+      );
+    } catch (error) {
+      console.error("Error toggling like:", error.message);
+    }
+  };
+
   return (
     <>
       <div className="row my-3">
@@ -68,20 +113,40 @@ const Category = () => {
                 <div
                   className="card-body"
                   role="button"
-                  data-bs-toggle="modal"
-                  data-bs-target="#exampleModal"
                   onClick={() => openModal(article)}
                 >
-                  <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="card-title">{article.title}</h5>
-                    {article.category.includes(selectedCategory) && (
-                      <span className="card-text text-primary">
-                        {selectedCategory}
-                      </span>
-                    )}
+                  <h5
+                    data-bs-toggle="modal"
+                    data-bs-target="#exampleModal"
+                    className="card-title"
+                  >
+                    {article.title}
+                  </h5>
+                  <p
+                    data-bs-toggle="modal"
+                    data-bs-target="#exampleModal"
+                    className="card-text"
+                  >
+                    {truncatedDescriptions[index]}
+                  </p>
+                  <div className="card-text text-primary d-flex justify-content-between align-items-center">
+                    <i
+                      className={`fa-solid fa-heart fs-5 ${
+                        isArticleLikedByUser(article)
+                          ? "text-danger"
+                          : "text-secondary"
+                      }`}
+                      onClick={() => handleLikeToggle(article)}
+                    ></i>
+                    <div className="d-flex">
+                      {article.category.includes(selectedCategory) && (
+                        <span className="card-text text-primary">
+                          {selectedCategory}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <p className="card-text">{truncatedDescriptions[index]}</p>
-                  <div className="d-flex justify-content-between">
+                  <div className="d-flex d-flex justify-content-between align-items-center">
                     <span className="card-text fw-semibold">
                       By: {article.user.name}
                     </span>
@@ -122,13 +187,32 @@ const Category = () => {
                   ></button>
                 </div>
                 <div className="modal-body">{selectedArticle.description}</div>
-                <div className="modal-footer d-flex justify-content-between align-items-center">
-                  <span className="card-text fw-semibold">
-                    By: {selectedArticle.user.name}
-                  </span>
-                  <span className="card-text">
-                    At: {formatDate(selectedArticle.createdAt)}
-                  </span>
+                <div className="border-top d-flex flex-column">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <i
+                      className={`fa-solid fa-heart fs-5 mt-1 ms-2 ${
+                        isArticleLikedByUser(selectedArticle)
+                          ? "text-danger"
+                          : "text-secondary"
+                      }`}
+                      onClick={() => handleLikeToggle(selectedArticle)}
+                    ></i>
+                    <div className="d-flex" data-bs-dismiss="modal">
+                      {selectedArticle.category.includes(selectedCategory) && (
+                        <span className="card-text text-primary me-2">
+                          {selectedCategory}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span className="card-text fw-semibold ms-2">
+                      By: {selectedArticle.user.name}
+                    </span>
+                    <span className="card-text me-2 mb-2">
+                      {formatDate(selectedArticle.createdAt)}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}

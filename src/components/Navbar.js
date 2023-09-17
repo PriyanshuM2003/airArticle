@@ -33,6 +33,7 @@ export const Navbar = () => {
       try {
         const data = await searchArticlesByTags(searchTags.toLowerCase());
         navigate(`/search/tags=${searchTags.toLowerCase()}`);
+        setSearchTags("");
       } catch (error) {
         console.error("Error searching articles:", error.message);
       }
@@ -161,7 +162,7 @@ export const Navbar = () => {
                 </>
               )}
             </ul>
-            <form className="d-flex me-4" onSubmit={handleSubmit}>
+            <form className="d-flex me-2" onSubmit={handleSubmit}>
               <input
                 className="form-control me-2"
                 type="text"

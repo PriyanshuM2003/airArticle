@@ -23,6 +23,16 @@ const ArticleSchema = new Schema(
       type: [String],
       required: true,
     },
+    likedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+      },
+    ],
+    likesCount: {
+      type: Number,
+      default: 0,
+    },
     date: {
       type: Date,
       default: Date.now,

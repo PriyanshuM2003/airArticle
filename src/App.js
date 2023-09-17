@@ -33,9 +33,16 @@ function App() {
           <Alert alert={alert} />
           <div className="container">
             <Routes>
-              <Route exact path="/" element={<Home />} />
-              <Route exact path="/category" element={<Category />} />
-              <Route path="/search/*" element={<Search />} />
+              <Route exact path="/" element={<Home showAlert={showAlert} />} />
+              <Route
+                exact
+                path="/category"
+                element={<Category showAlert={showAlert} />}
+              />
+              <Route
+                path="/search/:query"
+                element={<Search showAlert={showAlert} />}
+              />
               <Route
                 exact
                 path="/login"
