@@ -2,7 +2,7 @@ import ArticleContext from "./ArticleContext";
 import { useState } from "react";
 
 const ArticleState = (props) => {
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_SERVER;
   const articlesInitial = [];
 
   const [articles, setArticles] = useState(articlesInitial);
@@ -132,7 +132,6 @@ const ArticleState = (props) => {
       },
     });
     const json = response.json();
-    console.log(json);
 
     console.log("Deleted the article having id " + id);
     const newArticles = articles.filter((article) => {
@@ -154,7 +153,6 @@ const ArticleState = (props) => {
       body: JSON.stringify({ title, description, tags, category }),
     });
     const json = await response.json();
-    console.log(json);
 
     let newArticles = JSON.parse(JSON.stringify(articles));
     //* Edit logic
