@@ -6,6 +6,8 @@ const Category = (props) => {
   const context = useContext(ArticleContext);
   const { getAllArticles, articles, toggleLike } = context;
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [likedArticles, setLikedArticles] = useState([]);
   const userToken = localStorage.getItem("token");
   const location = useLocation();
@@ -14,7 +16,15 @@ const Category = (props) => {
     new URLSearchParams(location.search).get("category") || "";
 
   useEffect(() => {
-    getAllArticles(selectedCategory || undefined);
+    setLoading(true);
+    getAllArticles(selectedCategory || undefined)
+      .then(() => {
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(error);
+        setLoading(false);
+      });
   }, [selectedCategory]);
 
   const truncatedDescriptions = articles.map((article) => {
@@ -84,85 +94,97 @@ const Category = (props) => {
 
   return (
     <>
-      <div className="row my-3">
-        {articles.length === 0 && (
-          <div className="container text-danger fs-1 d-flex justify-content-center align-items-center mx-auto">
-            No articles to display!
+      {loading ? (
+        <div className="text-center mt-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
           </div>
-        )}
-        {articles.length !== 0 &&
-          articles.some((article) =>
-            article.category.includes(selectedCategory)
-          ) && (
-            <div className="container d-flex justify-content-center align-items-center mx-auto">
-              <h3 className=" align-items-center text-danger text-decoration-underline">
-                Showing Articles of&nbsp;
-                <span className="text-primary">{selectedCategory}</span>
-                &nbsp;Category
-              </h3>
-            </div>
-          )}
-        {articles && articles.length > 0 ? (
-          articles.map((article, index) => (
-            <div
-              key={article._id}
-              className="col-my-3"
-              style={{ width: "437px" }}
-            >
-              <div className="card my-3 border border-info-subtle">
+        </div>
+      ) : (
+        <>
+          <div className="row my-3">
+            {articles.length === 0 && (
+              <div className="container text-danger fs-1 d-flex justify-content-center align-items-center mx-auto">
+                No articles to display!
+              </div>
+            )}
+            {articles.length !== 0 &&
+              articles.some((article) =>
+                article.category.includes(selectedCategory)
+              ) && (
+                <div className="container d-flex justify-content-center align-items-center mx-auto">
+                  <h3 className=" align-items-center text-danger text-decoration-underline">
+                    Showing Articles of&nbsp;
+                    <span className="text-primary">{selectedCategory}</span>
+                    &nbsp;Category
+                  </h3>
+                </div>
+              )}
+            {articles && articles.length > 0 ? (
+              articles.map((article, index) => (
                 <div
-                  className="card-body"
-                  role="button"
-                  onClick={() => openModal(article)}
+                  key={article._id}
+                  className="col-my-3"
+                  style={{ width: "437px" }}
                 >
-                  <h5
-                    data-bs-toggle="modal"
-                    data-bs-target="#exampleModal"
-                    className="card-title"
-                  >
-                    {article.title}
-                  </h5>
-                  <p
-                    data-bs-toggle="modal"
-                    data-bs-target="#exampleModal"
-                    className="card-text"
-                  >
-                    {truncatedDescriptions[index]}
-                  </p>
-                  <div className="card-text text-primary d-flex justify-content-between align-items-center">
-                    <i
-                      className={`fa-solid fa-heart fs-5 ${
-                        isArticleLikedByUser(article)
-                          ? "text-danger"
-                          : "text-secondary"
-                      }`}
-                      onClick={() => handleLikeToggle(article)}
-                    ></i>
-                    <div className="d-flex">
-                      {article.category.includes(selectedCategory) && (
-                        <span className="card-text text-primary">
-                          {selectedCategory}
+                  <div className="card my-3 border border-info-subtle">
+                    <div
+                      className="card-body"
+                      role="button"
+                      onClick={() => openModal(article)}
+                    >
+                      <h5
+                        data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        className="card-title"
+                      >
+                        {article.title}
+                      </h5>
+                      <p
+                        data-bs-toggle="modal"
+                        data-bs-target="#exampleModal"
+                        className="card-text"
+                      >
+                        {truncatedDescriptions[index]}
+                      </p>
+                      <div className="card-text text-primary d-flex justify-content-between align-items-center">
+                        <i
+                          className={`fa-solid fa-heart fs-5 ${
+                            isArticleLikedByUser(article)
+                              ? "text-danger"
+                              : "text-secondary"
+                          }`}
+                          onClick={() => handleLikeToggle(article)}
+                        ></i>
+                        <div className="d-flex">
+                          {article.category.includes(selectedCategory) && (
+                            <span className="card-text text-primary">
+                              {selectedCategory}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="d-flex d-flex justify-content-between align-items-center">
+                        <span className="card-text fw-semibold">
+                          By: {article.user.name}
                         </span>
-                      )}
+                        <span className="card-text">
+                          {formatDate(article.createdAt)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="d-flex d-flex justify-content-between align-items-center">
-                    <span className="card-text fw-semibold">
-                      By: {article.user.name}
-                    </span>
-                    <span className="card-text">
-                      {formatDate(article.createdAt)}
-                    </span>
-                  </div>
                 </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <></>
-        )}
-      </div>
-
+              ))
+            ) : (
+              <></>
+            )}
+          </div>
+          {error && (
+            <div className="container text-danger fs-1">{`Error: ${error.message}`}</div>
+          )}
+        </>
+      )}
       <div
         className="modal fade"
         id="exampleModal"

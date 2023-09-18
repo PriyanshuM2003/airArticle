@@ -5,17 +5,29 @@ import ArticleContext from "../context/ArticleContext";
 export const MyArticles = (props) => {
   const context = useContext(ArticleContext);
   const { deleteArticle } = context;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   let navigate = useNavigate();
   const { articles, getLoggedArticles, editArticle } = context;
 
   useEffect(() => {
+    setLoading(true);
+
     if (localStorage.getItem("token")) {
-      getLoggedArticles();
+      getLoggedArticles()
+        .then(() => {
+          setLoading(false);
+        })
+        .catch((error) => {
+          setError(error);
+          setLoading(false);
+        });
     } else {
       navigate("/login");
     }
     // eslint-disable-next-line
   }, []);
+
   const ref = useRef(null);
   const refClose = useRef(null);
 
@@ -121,50 +133,67 @@ export const MyArticles = (props) => {
 
   return (
     <>
-      <div className="row my-3">
-        <h2 className="text-primary text-decoration-underline">My Articles</h2>
-        <div className="container text-danger fs-1 d-flex justify-content-center align-items-center mx-auto">
-          {articles.length === 0 && "No articles to display!"}
+      {loading ? (
+        <div className="text-center mt-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
         </div>
-        {articles.map((article, index) => {
-          return (
-            <div
-              key={article._id}
-              onClick={() => {
-                updateArticle(article);
-              }}
-              className="col-my-3"
-              style={{ width: "437px" }}
-            >
-              <div className="card my-3 border border-info-subtle">
-                <div className="card-body" role="button">
-                  <h5 className="card-title">{article.title}</h5>
-                  <p className="card-text">{truncatedDescriptions[index]}</p>
-                  <div className="d-flex justify-content-end align-items-center">
-                    <p className="card-text text-primary">
-                      {article.category.join(", ")}
-                    </p>
-                  </div>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <i className="fa-solid fa-heart fs-5 text-danger">
-                      &nbsp;:&nbsp;
-                      <span
-                        className="fw-normal text-dark"
-                        style={{ fontSize: "12px" }}
-                      >
-                        {article.likesCount}
-                      </span>
-                    </i>
-                    <span className=" card-text">
-                      {formatDate(article.createdAt)}
-                    </span>
+      ) : (
+        <>
+          <div className="row my-3">
+            <h2 className="text-primary text-decoration-underline">
+              My Articles
+            </h2>
+            <div className="container text-danger fs-1 d-flex justify-content-center align-items-center mx-auto">
+              {articles.length === 0 && "No articles to display!"}
+            </div>
+            {articles.map((article, index) => {
+              return (
+                <div
+                  key={article._id}
+                  onClick={() => {
+                    updateArticle(article);
+                  }}
+                  className="col-my-3"
+                  style={{ width: "437px" }}
+                >
+                  <div className="card my-3 border border-info-subtle">
+                    <div className="card-body" role="button">
+                      <h5 className="card-title">{article.title}</h5>
+                      <p className="card-text">
+                        {truncatedDescriptions[index]}
+                      </p>
+                      <div className="d-flex justify-content-end align-items-center">
+                        <p className="card-text text-primary">
+                          {article.category.join(", ")}
+                        </p>
+                      </div>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <i className="fa-solid fa-heart fs-5 text-danger">
+                          &nbsp;:&nbsp;
+                          <span
+                            className="fw-normal text-dark"
+                            style={{ fontSize: "12px" }}
+                          >
+                            {article.likesCount}
+                          </span>
+                        </i>
+                        <span className=" card-text">
+                          {formatDate(article.createdAt)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+          {error && (
+            <div className="container text-danger fs-1">{`Error: ${error.message}`}</div>
+          )}
+        </>
+      )}
 
       <div
         className="modal fade"
