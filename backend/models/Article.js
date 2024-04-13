@@ -25,8 +25,14 @@ const ArticleSchema = new Schema(
     },
     likedBy: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "user",
+        },
+        liked: {
+          type: Boolean,
+          default: false,
+        },
       },
     ],
     likesCount: {

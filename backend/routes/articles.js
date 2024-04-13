@@ -19,30 +19,47 @@ router.get("/fetchallarticles", async (req, res) => {
 });
 
 // * Article like/unlike
-router.post("/togglelike/:id", fetchuser, async (req, res) => {
+router.get("/likestate/:id", fetchuser, async (req, res) => {
   try {
-    const article = await Article.findById(req.params.id).populate("likedBy");
-
+    const article = await Article.findById(req.params.id);
     if (!article) {
       return res.status(404).json({ error: "Article not found" });
     }
-
     const userId = req.user.id;
+    const likedByUser = article.likedBy.some(
+      (like) => like.user.toString() === userId && like.liked === true
+    );
+    res.json({ liked: likedByUser });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
-    if (article.likedBy.some((user) => user._id.equals(userId))) {
-      article.likedBy = article.likedBy.filter(
-        (user) => !user._id.equals(userId)
-      );
-    } else {
-      article.likedBy.push(userId);
+//* Toggle like/unlike for an article
+router.post("/togglelike/:id", fetchuser, async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id);
+    if (!article) {
+      return res.status(404).json({ error: "Article not found" });
     }
-
-    article.likesCount = article.likedBy.length;
-
+    const userId = req.user.id;
+    const alreadyLikedIndex = article.likedBy.findIndex(
+      (like) => like.user.toString() === userId
+    );
+    if (alreadyLikedIndex !== -1) {
+      article.likedBy[alreadyLikedIndex].liked =
+        !article.likedBy[alreadyLikedIndex].liked;
+    } else {
+      article.likedBy.push({ user: userId, liked: true });
+    }
+    article.likesCount = article.likedBy.filter((like) => like.liked).length;
     await article.save();
-
     res.json({
-      liked: article.likedBy.some((user) => user._id.equals(userId)),
+      liked:
+        alreadyLikedIndex === -1
+          ? true
+          : article.likedBy[alreadyLikedIndex].liked,
       likesCount: article.likesCount,
     });
   } catch (error) {

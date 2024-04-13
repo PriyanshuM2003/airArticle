@@ -7,7 +7,7 @@ dotenv.config();
 connectTOMongo();
 
 const corsOptions = {
-  origin: "https://airarticle.vercel.app",
+  origin: process.env.HOST,
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 };
 

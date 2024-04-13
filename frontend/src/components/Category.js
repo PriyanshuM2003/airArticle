@@ -4,13 +4,13 @@ import { useLocation } from "react-router-dom";
 
 const Category = (props) => {
   const context = useContext(ArticleContext);
-  const { getAllArticles, articles, toggleLike } = context;
+  const { getAllArticles, articles, toggleLike, fetchLikeState } = context;
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [likedArticles, setLikedArticles] = useState([]);
   const userToken = localStorage.getItem("token");
   const location = useLocation();
+  const [fetching, setFetching] = useState(true);
 
   const selectedCategory =
     new URLSearchParams(location.search).get("category") || "";
@@ -25,6 +25,20 @@ const Category = (props) => {
         setError(error);
         setLoading(false);
       });
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (userToken && fetching) {
+        fetchLikeState();
+        setFetching(false);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [fetchLikeState, userToken, fetching]);
+
+  useEffect(() => {
+    setFetching(true);
   }, [selectedCategory]);
 
   const truncatedDescriptions = articles.map((article) => {
@@ -49,47 +63,14 @@ const Category = (props) => {
     setSelectedArticle(article);
   };
 
-  const isArticleLikedByUser = (article) => {
-    const isLiked = likedArticles.includes(article._id);
-
-    if (userToken) {
-      const previouslyLikedArticles =
-        JSON.parse(localStorage.getItem(`${userToken}_likedArticles`)) || [];
-
-      if (previouslyLikedArticles.includes(article._id)) {
-        return true;
-      }
-    }
-
-    return isLiked;
-  };
-
   const handleLikeToggle = async (article) => {
-    try {
-      if (!userToken) {
-        props.showAlert("Please Login/Signup to Like the Article", "warning");
-        return;
-      }
-
-      const liked = likedArticles.includes(article._id);
-      const updatedArticle = await toggleLike(article._id, liked, userToken);
-
-      let updatedLikedArticles;
-
-      if (liked) {
-        updatedLikedArticles = likedArticles.filter((id) => id !== article._id);
-      } else {
-        updatedLikedArticles = [...likedArticles, article._id];
-      }
-
-      setLikedArticles(updatedLikedArticles);
-      localStorage.setItem(
-        `${userToken}_likedArticles`,
-        JSON.stringify(updatedLikedArticles)
-      );
-    } catch (error) {
-      console.error("Error toggling like:", error.message);
+    if (!userToken) {
+      props.showAlert("Please Login/Signup to Like the Article", "warning");
+      return;
     }
+
+    await toggleLike(article._id);
+    fetchLikeState();
   };
 
   return (
@@ -150,9 +131,7 @@ const Category = (props) => {
                       <div className="card-text text-primary d-flex justify-content-between align-items-center">
                         <i
                           className={`fa-solid fa-heart fs-5 ${
-                            isArticleLikedByUser(article)
-                              ? "text-danger"
-                              : "text-secondary"
+                            article.liked ? "text-danger" : "text-secondary"
                           }`}
                           onClick={() => handleLikeToggle(article)}
                         ></i>
@@ -213,9 +192,7 @@ const Category = (props) => {
                   <div className="d-flex justify-content-between align-items-center">
                     <i
                       className={`fa-solid fa-heart fs-5 mt-1 ms-2 ${
-                        isArticleLikedByUser(selectedArticle)
-                          ? "text-danger"
-                          : "text-secondary"
+                        selectedArticle.liked ? "text-danger" : "text-secondary"
                       }`}
                       onClick={() => handleLikeToggle(selectedArticle)}
                     ></i>

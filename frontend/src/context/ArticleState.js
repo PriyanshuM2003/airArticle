@@ -53,7 +53,6 @@ const ArticleState = (props) => {
       }
 
       const responseData = await response.json();
-
       const newArticles = articles.map((article) =>
         article._id === articleId
           ? {
@@ -63,16 +62,43 @@ const ArticleState = (props) => {
             }
           : article
       );
-
       setArticles(newArticles);
-
-      if (responseData.liked) {
-        console.log("Like toggled");
-      } else {
-        console.log("Dislike toggled");
-      }
     } catch (error) {
       console.error("Error toggling like:", error.message);
+    }
+  };
+
+  // * fucntion for like state
+  const fetchLikeState = async () => {
+    try {
+      const updatedArticles = [];
+      for (const article of articles) {
+        const response = await fetch(
+          `${host}/api/articles/likestate/${article._id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "auth-token": localStorage.getItem("token"),
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        const likedByUser = data.liked;
+
+        const updatedArticle = {
+          ...article,
+          liked: likedByUser,
+        };
+        updatedArticles.push(updatedArticle);
+      }
+      setArticles(updatedArticles);
+    } catch (error) {
+      console.error("Error fetching like state:", error.message);
     }
   };
 
@@ -180,6 +206,7 @@ const ArticleState = (props) => {
         getLoggedArticles,
         searchArticlesByTags,
         toggleLike,
+        fetchLikeState,
       }}
     >
       {props.children}
