@@ -112,7 +112,7 @@ export const Home = (props) => {
                       >
                         {truncatedDescriptions[index]}
                       </p>
-                      <div className="card-text text-primary d-flex justify-content-between align-items-center">
+                      <div className="card-text text-primary d-flex gap-4 justify-content-between align-items-center">
                         <i
                           className={`fa-solid fa-heart fs-5 ${
                             article.liked ? "text-danger" : "text-secondary"
@@ -120,16 +120,18 @@ export const Home = (props) => {
                           onClick={() => handleLikeToggle(article)}
                         ></i>
 
-                        <div className="d-flex">
-                          {article.category.map((category, categoryIndex) => (
-                            <Link
-                              key={categoryIndex}
-                              to={`/category/?category=${category}`}
-                              className="card-text me-1 text-decoration-none"
-                            >
-                              {category},
-                            </Link>
-                          ))}
+                        <div className="d-flex flex-wrap">
+                          {article.category
+                            .map((category, categoryIndex) => (
+                              <Link
+                                key={categoryIndex}
+                                to={`/category/?category=${category}`}
+                                className="card-text ms-1 link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+                              >
+                                {category}
+                              </Link>
+                            ))
+                            .reduce((prev, curr) => [prev, ", ", curr])}
                         </div>
                       </div>
                       <div className="d-flex d-flex justify-content-between align-items-center">
@@ -186,18 +188,18 @@ export const Home = (props) => {
                       }`}
                       onClick={() => handleLikeToggle(selectedArticle)}
                     ></i>
-                    <div className="d-flex" data-bs-dismiss="modal">
-                      {selectedArticle.category.map(
-                        (category, categoryIndex) => (
+                    <div className="d-flex me-2" data-bs-dismiss="modal">
+                      {selectedArticle.category
+                        .map((category, categoryIndex) => (
                           <Link
                             key={categoryIndex}
                             to={`/category/?category=${category}`}
-                            className="card-text me-2 text-decoration-none"
+                            className="card-text ms-2 link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
                           >
                             {category}
                           </Link>
-                        )
-                      )}
+                        ))
+                        .reduce((prev, curr) => [prev, ", ", curr])}
                     </div>
                   </div>
                   <div className="d-flex justify-content-between align-items-center">

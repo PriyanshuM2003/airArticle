@@ -10,36 +10,26 @@ const AddArticle = ({ showAlert }) => {
     article: {
       title: "",
       description: "",
-      tags: [],
       category: [],
     },
-    inputTag: "",
   });
 
-  const { article, inputTag } = state;
+  const { article } = state;
 
   const isSaveDisabled =
     article.title.length < 1 ||
     article.description.length < 1 ||
-    article.tags.length < 1 ||
     article.category.length < 1;
 
   const handleSaveClick = (e) => {
     e.preventDefault();
-    addArticle(
-      article.title,
-      article.description,
-      article.tags,
-      article.category
-    );
+    addArticle(article.title, article.description, article.category);
     setState({
       article: {
         title: "",
         description: "",
-        tags: [],
         category: [],
       },
-      inputTag: "",
     });
     showAlert("Added successfully", "success");
   };
@@ -68,37 +58,6 @@ const AddArticle = ({ showAlert }) => {
     }
   };
 
-  const handleTagInputChange = (e) => {
-    setState({ ...state, inputTag: e.target.value });
-  };
-
-  const handleTagInputKeyDown = (e) => {
-    if (e.key === "Enter" && inputTag) {
-      const lowercaseTag = inputTag.toLowerCase();
-      setState((prevState) => ({
-        ...prevState,
-        article: {
-          ...prevState.article,
-          tags: [...prevState.article.tags, lowercaseTag],
-        },
-        inputTag: "",
-      }));
-    }
-  };
-
-  const handleRemoveTag = (index) => {
-    setState((prevState) => ({
-      ...prevState,
-      article: {
-        ...prevState.article,
-        tags: [
-          ...prevState.article.tags.slice(0, index),
-          ...prevState.article.tags.slice(index + 1),
-        ],
-      },
-    }));
-  };
-
   useEffect(() => {
     if (!localStorage.token) {
       navigate("/login");
@@ -108,19 +67,7 @@ const AddArticle = ({ showAlert }) => {
   return (
     <>
       <div className="container my-3">
-        <div className="d-flex justify-content-between">
-          <h2 className="d-flex align-items-center text-primary text-decoration-underline">
-            Add Article
-          </h2>
-          <button
-            disabled={isSaveDisabled}
-            type="button"
-            className="btn btn-primary d-inline-flex fs-5 fw-semibold px-4 align-items-center"
-            onClick={handleSaveClick}
-          >
-            Save
-          </button>
-        </div>
+        <h2 className="text-primary d-flex justify-content-center align-items-center text-decoration-underline">Add Article</h2>
         <form className="my-3">
           <div className="mb-3">
             <label htmlFor="title" className="form-label fw-semibold">
@@ -146,43 +93,8 @@ const AddArticle = ({ showAlert }) => {
               name="description"
               value={article.description}
               onChange={onChange}
-              style={{ height: "14rem" }}
+              style={{ height: "20rem" }}
             />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="tags" className="form-label fw-semibold">
-              Tags
-            </label>
-            <div className="d-flex align-items-center">
-              <input
-                type="text"
-                className="form-control w-25 me-2"
-                id="tags"
-                placeholder="Press Enter to add Tag"
-                name="tags"
-                value={inputTag}
-                onChange={handleTagInputChange}
-                onKeyDown={handleTagInputKeyDown}
-              />
-              <div className="tags-list">
-                {article.tags.map((tag, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    className="tag-badge btn btn-primary btn-sm me-1 mt-1 fw-semibold"
-                    onClick={() => handleRemoveTag(index)}
-                  >
-                    {tag} <span className="badge badge-light">&times;</span>
-                  </button>
-                ))}
-              </div>
-              {article.tags.length === 0 && (
-                <p className="text-danger fw-bold">
-                  /*Enter relevant Tags. These tags will be used for searching
-                  your article.*/
-                </p>
-              )}
-            </div>
           </div>
           <div className="d-flex flex-column">
             <label htmlFor="category" className="form-label fw-semibold">
@@ -221,6 +133,16 @@ const AddArticle = ({ showAlert }) => {
             </div>
           </div>
         </form>
+        <div className="d-flex mt-4 justify-content-center align-items-center">
+          <button
+            disabled={isSaveDisabled}
+            type="button"
+            className="btn btn-primary fs-5 fw-semibold px-4"
+            onClick={handleSaveClick}
+          >
+            Save
+          </button>
+        </div>
       </div>
     </>
   );

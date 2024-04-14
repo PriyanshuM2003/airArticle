@@ -15,9 +15,9 @@ const categories = [
 export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchTags, setSearchTags] = useState("");
+  const [searchTitle, setSearchTitle] = useState("");
   const context = useContext(ArticleContext);
-  const { searchArticlesByTags } = context;
+  const { searchArticlesByTitle } = context;
 
   const selectedCategory =
     new URLSearchParams(location.search).get("category") || "";
@@ -29,16 +29,17 @@ export const Navbar = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (searchTags) {
+    if (searchTitle) {
       try {
-        const data = await searchArticlesByTags(searchTags.toLowerCase());
-        navigate(`/search/tags=${searchTags.toLowerCase()}`);
-        setSearchTags("");
+        await searchArticlesByTitle(searchTitle.toLowerCase());
+        navigate(`/search/title=${searchTitle.toLowerCase()}`);
+        setSearchTitle("");
       } catch (error) {
         console.error("Error searching articles:", error.message);
       }
     }
   };
+  
 
   const renderCategories = () => {
     return categories.map((category) => (
@@ -168,8 +169,8 @@ export const Navbar = () => {
                 type="text"
                 placeholder="Search"
                 aria-label="Search"
-                value={searchTags}
-                onChange={(e) => setSearchTags(e.target.value)}
+                value={searchTitle}
+                onChange={(e) => setSearchTitle(e.target.value)}
               />
               <button className="btn btn-success fw-semibold" type="submit">
                 Search

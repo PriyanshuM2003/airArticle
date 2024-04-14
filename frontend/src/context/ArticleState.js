@@ -102,10 +102,10 @@ const ArticleState = (props) => {
     }
   };
 
-  //* Function to search articles by tags
-  const searchArticlesByTags = async (tags) => {
+  //* Function to search articles
+  const searchArticlesByTitle = async (title) => {
     try {
-      const url = `${host}/api/articles/search?tags=${tags}`;
+      const url = `${host}/api/articles/search?title=${title}`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -117,6 +117,7 @@ const ArticleState = (props) => {
       throw new Error(`Error fetching data: ${error.message}`);
     }
   };
+
   //* Getting logged user articles
   const getLoggedArticles = async () => {
     const response = await fetch(
@@ -134,7 +135,7 @@ const ArticleState = (props) => {
   };
 
   //* Adding article
-  const addArticle = async (title, description, tags, category) => {
+  const addArticle = async (title, description, category) => {
     const response = await fetch(`${host}/api/articles/addarticle`, {
       method: "POST",
       headers: {
@@ -142,7 +143,7 @@ const ArticleState = (props) => {
         "auth-token": localStorage.getItem("token"),
       },
 
-      body: JSON.stringify({ title, description, tags, category }),
+      body: JSON.stringify({ title, description, category }),
     });
     const article = await response.json();
     setArticles(articles.concat(article));
@@ -168,7 +169,7 @@ const ArticleState = (props) => {
 
   //* Edit article
 
-  const editArticle = async (id, title, description, tags, category) => {
+  const editArticle = async (id, title, description, category) => {
     const response = await fetch(`${host}/api/articles/updatearticle/${id}`, {
       method: "PUT",
       headers: {
@@ -176,7 +177,7 @@ const ArticleState = (props) => {
         "auth-token": localStorage.getItem("token"),
       },
 
-      body: JSON.stringify({ title, description, tags, category }),
+      body: JSON.stringify({ title, description, category }),
     });
     const json = await response.json();
 
@@ -187,7 +188,6 @@ const ArticleState = (props) => {
       if (element._id === id) {
         newArticles[index].title = title;
         newArticles[index].description = description;
-        newArticles[index].tags = tags;
         newArticles[index].category = category;
         break;
       }
@@ -204,7 +204,7 @@ const ArticleState = (props) => {
         editArticle,
         getAllArticles,
         getLoggedArticles,
-        searchArticlesByTags,
+        searchArticlesByTitle,
         toggleLike,
         fetchLikeState,
       }}

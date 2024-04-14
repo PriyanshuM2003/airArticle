@@ -68,19 +68,18 @@ router.post("/togglelike/:id", fetchuser, async (req, res) => {
   }
 });
 
-// * Get searched query tags result
+// * Get searched query result
 router.get("/search", async (req, res) => {
-  const { tags } = req.query;
+  const { title } = req.query;
 
   try {
-    if (!tags) {
-      return res.status(400).json({ error: "Tags parameter is required" });
+    if (!title) {
+      return res.status(400).json({ error: "title parameter is required" });
     }
 
     const articles = await Article.find({
-      tags: { $in: tags.split(",") },
+      title: { $regex: new RegExp(title, "i") }
     }).populate("user", "name");
-
     res.json(articles);
   } catch (error) {
     console.error("Error searching articles:", error.message);
@@ -109,7 +108,7 @@ router.post(
   ],
   async (req, res) => {
     try {
-      const { title, description, tags, category } = req.body;
+      const { title, description, category } = req.body;
 
       //* To check errors
       const errors = validationResult(req);
@@ -120,7 +119,6 @@ router.post(
       const article = new Article({
         title,
         description,
-        tags,
         category,
         user: req.user.id,
       });
@@ -137,7 +135,7 @@ router.post(
 
 //* Updating existing article. Using PUT"api/articles/updatearticle" login required
 router.put("/updatearticle/:id", fetchuser, async (req, res) => {
-  const { title, description, tags, category } = req.body;
+  const { title, description, category } = req.body;
   try {
     //* creating a newArticle object
     const newArticle = {};
@@ -146,9 +144,6 @@ router.put("/updatearticle/:id", fetchuser, async (req, res) => {
     }
     if (description) {
       newArticle.description = description;
-    }
-    if (tags) {
-      newArticle.tags = tags;
     }
     if (category) {
       newArticle.category = category;

@@ -35,13 +35,10 @@ export const MyArticles = (props) => {
     id: "",
     etitle: "",
     edescription: "",
-    etags: [],
     ecategory: [],
     ecreatedAt: "",
     elikesCount: "",
   });
-
-  const [inputTag, setInputTag] = useState("");
 
   const updateArticle = (currentArticle) => {
     ref.current.click();
@@ -49,7 +46,6 @@ export const MyArticles = (props) => {
       id: currentArticle._id,
       etitle: currentArticle.title,
       edescription: currentArticle.description,
-      etags: currentArticle.tags,
       ecategory: currentArticle.category,
       ecreatedAt: currentArticle.createdAt,
       elikesCount: currentArticle.likesCount,
@@ -61,13 +57,11 @@ export const MyArticles = (props) => {
       article.id,
       article.etitle,
       article.edescription,
-      article.etags,
       article.ecategory,
       article.ecreatedAt,
       article.elikesCount
     );
     refClose.current.click();
-    setInputTag("");
     props.showAlert("Updated successfully", "success");
   };
 
@@ -90,27 +84,6 @@ export const MyArticles = (props) => {
     } else {
       setArticle({ ...article, [e.target.name]: e.target.value });
     }
-  };
-
-  const handleTagInputChange = (e) => {
-    setInputTag(e.target.value);
-  };
-
-  const handleTagInputKeyDown = (e) => {
-    if (e.key === "Enter" && inputTag) {
-      const lowercaseTag = inputTag.toLowerCase();
-      setArticle({
-        ...article,
-        etags: [...article.etags, lowercaseTag],
-      });
-      setInputTag("");
-    }
-  };
-
-  const handleRemoveTag = (index) => {
-    const updatedTags = [...article.etags];
-    updatedTags.splice(index, 1);
-    setArticle({ ...article, etags: updatedTags });
   };
 
   const truncatedDescriptions = articles.map((article) => {
@@ -160,11 +133,16 @@ export const MyArticles = (props) => {
                 >
                   <div className="card my-3 border border-info-subtle">
                     <div className="card-body" role="button">
-                      <h5 className="card-title">{article.title}</h5>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <h5 className="card-title">{article.title}</h5>
+                        <span className=" card-text">
+                          {formatDate(article.createdAt)}
+                        </span>
+                      </div>
                       <p className="card-text">
                         {truncatedDescriptions[index]}
                       </p>
-                      <div className="d-flex justify-content-end align-items-center">
+                      <div className="d-flex justify-content-end mb-2 align-items-center">
                         <p className="card-text text-primary">
                           {article.category.join(", ")}
                         </p>
@@ -179,9 +157,13 @@ export const MyArticles = (props) => {
                             {article.likesCount}
                           </span>
                         </i>
-                        <span className=" card-text">
-                          {formatDate(article.createdAt)}
-                        </span>
+                        <button
+                          className="btn btn-primary fw-semibold me-2"
+                          data-bs-target="#exampleModalToggle2"
+                          data-bs-toggle="modal"
+                        >
+                          Edit Article
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -299,35 +281,6 @@ export const MyArticles = (props) => {
                     onChange={onChange}
                     style={{ height: "15rem" }}
                   />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="etags" className="form-label fw-semibold">
-                    Tags
-                  </label>
-                  <div className="d-flex align-items-center">
-                    <input
-                      type="text"
-                      className="form-control w-25 me-2"
-                      id="etags"
-                      name="etags"
-                      value={inputTag}
-                      onChange={handleTagInputChange}
-                      onKeyDown={handleTagInputKeyDown}
-                    />
-                    <div className="tags-list">
-                      {article.etags.map((tag, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          className="tag-badge btn btn-primary btn-sm me-1 mt-1 fw-semibold"
-                          onClick={() => handleRemoveTag(index)}
-                        >
-                          {tag}{" "}
-                          <span className="badge badge-light">&times;</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
                 </div>
                 <div className="d-flex flex-column">
                   <label htmlFor="category" className="form-label fw-semibold">

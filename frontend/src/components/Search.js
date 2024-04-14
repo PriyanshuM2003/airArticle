@@ -4,11 +4,9 @@ import { useParams } from "react-router-dom";
 
 const Search = (props) => {
   const { query } = useParams();
-  const queryWithoutPrefix = query.startsWith("tags=")
-    ? query.substring(5)
-    : query;
+  const queryWithoutPrefix = query.startsWith("title=") ? query.substring(6) : query;
   const context = useContext(ArticleContext);
-  const { articles, searchArticlesByTags, toggleLike, fetchLikeState } =
+  const { articles, searchArticlesByTitle, toggleLike, fetchLikeState } =
     context;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,7 +22,7 @@ const Search = (props) => {
       try {
         if (query) {
           if (!articles || articles.length === 0) {
-            await searchArticlesByTags(query);
+            await searchArticlesByTitle(queryWithoutPrefix);
           }
         } else {
         }

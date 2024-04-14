@@ -19,10 +19,6 @@ const ArticleSchema = new Schema(
       type: [String],
       required: true,
     },
-    tags: {
-      type: [String],
-      required: true,
-    },
     likedBy: [
       {
         user: {
